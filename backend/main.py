@@ -9,5 +9,19 @@ import flask
 import sys
 import time
 
+# WebDriver のオプションを設定する
+options = webdriver.ChromeOptions()
+# options.add_argument('--headless')  # ヘッドレスモードを無効にする
+
+# Chromeドライバのパスを指定する
+driver = webdriver.Chrome(options=options)
+
+
+
 def reserve():
-    pass
+    # Webページを開く
+    driver.get("http://217.178.99.36/Scripts/MGrqispi015.dll?APPNAME=NK-YOYAKU&PRGNAME=login")
+    
+    # 教習生番号
+
+    # ＠パスワード
