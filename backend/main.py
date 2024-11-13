@@ -1,5 +1,5 @@
 """
-バックエンド（自動入力して予約する部分）
+バックエンド（フロントの情報をもとに自動入力して予約する部分）
 
 このスクリプトは、Seleniumを使用して自動的にウェブサイトにログインし、予約を行うシステムです。
 主な機能として、ログイン、通常予約、キャンセル待ち予約があります。
@@ -15,7 +15,7 @@ import time
 
 # WebDriver のオプションを設定する
 options = webdriver.ChromeOptions()
-options.add_argument('--headless')  # ヘッドレスモードを無効にする
+#options.add_argument('--headless')  # ヘッドレスモードを無効にする
 
 # Chromeドライバのパスを指定する
 driver = webdriver.Chrome(options=options)
@@ -57,15 +57,21 @@ def reserve_time_slot(time_slot: str):
         time_slot (str): 予約したい時間帯（例: "10:40"）
     """
     try:
+
         # 指定された時間帯の行を見つける
-        row = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, f"//tr[td[text()='{time_slot}']]"))
-        )
+        elements=[driver.find_element(By.XPATH, f'/html/body/p[5]/table/tbody/tr[{i}]/td[1]/p') for i in range(13)]
+        
+        for elem in elements:
+            print(elem.text)
+        print("行を見つけました")
         # 行内の「空○」ボタンをクリック
         reserve_button = row.find_element(By.XPATH, ".//input[@value='空○']")
         reserve_button.click()
     except Exception as e:
-        print(f"Error in reserve_time_slot: {e}")
+        if "no such element" in str(e):
+            print(f"予約が開いていませんでした: {time_slot}")
+        else:
+            print(f"Error in reserve_time_slot: {e}")
 
 def normal_reserve(student_id: str, password: str, date: str, time_slot: str):
     """
@@ -80,12 +86,16 @@ def normal_reserve(student_id: str, password: str, date: str, time_slot: str):
     try:
         # ログインする
         login(student_id, password)
+        print("ログイン成功")
         # 技能予約をクリック
         skill_reserve_button = driver.find_element(By.CSS_SELECTOR, "input[value='技能予約']")
         skill_reserve_button.click()
+        print("予約中")
         # 予約したい日時に予約する
         date_field = driver.find_element(By.CSS_SELECTOR, f"input[value='{date}']")
         date_field.click()
+        print(date+"の予約を確認")
+
         reserve_time_slot(time_slot)
         # 予約を確定する
         confirm_button = driver.find_element(By.CSS_SELECTOR, "input[value='続　行']")
@@ -120,4 +130,5 @@ def cancelmachi(student_id: str, password: str, time_slot: str):
 
 if __name__ == '__main__':
     open_web("http://217.178.99.36/Scripts/MGrqispi015.dll?APPNAME=NK-YOYAKU&PRGNAME=login")
+    time.sleep(1)
     normal_reserve("60354", "051231", "11/27(水)", "10:40")
